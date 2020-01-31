@@ -1,0 +1,26 @@
+---
+version: 2.1
+jobs:
+  tests:
+    docker:
+      - image: circleci/python:3.7-buster
+    steps:
+      - run:
+          name: Install Debian packaging dependencies
+          command: |
+            sudo apt install rpm git-lfs
+
+      - run:
+          name: Clone the repository with LFS
+          command: git clone --depth=1 -b ${CIRCLE_BRANCH} https://github.com/freedomofpress/securedrop-workstation-dev-rpm-packages-lfs
+      - run:
+          name: Verify the signatures of all rpm artifacts
+          command: |
+            cd securedrop-workstation-dev-rpm-packages-lfs
+            git-lfs install
+            ./scripts/check.py --dev --verify --all
+
+workflows:
+  build-packages:
+    jobs:
+      - tests
