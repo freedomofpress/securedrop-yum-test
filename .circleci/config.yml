@@ -3,12 +3,13 @@ version: 2.1
 jobs:
   tests:
     docker:
-      - image: circleci/python:3.7-buster
+      - image: debian:buster
     steps:
+      - run: apt-get update && apt-get install -y sudo
       - run:
           name: Install Debian packaging dependencies
           command: |
-            sudo apt install rpm git-lfs
+            sudo apt install -y python3 git rpm git-lfs
 
       - run:
           name: Clone the repository with LFS
