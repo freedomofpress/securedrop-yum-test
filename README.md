@@ -15,3 +15,4 @@ The repository requires use of [git-lfs](https://git-lfs.github.com/) to store l
 Merging into the `main` branch will automatically deploy packages to
 https://yum-test.securedrop.org/. Publishing happens every 15m.
 test
+test
