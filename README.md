@@ -1,6 +1,6 @@
 > By contributing to this project, you agree to abide by our [Code of Conduct](https://github.com/freedomofpress/.github/blob/main/CODE_OF_CONDUCT.md).
 
-# securedrop-workstation-dev-rpm-packages-lfs
+# securedrop-yum-test
 
 Repository for storing nightly builds of [SecureDrop Workstation](https://github.com/freedomofpress/securedrop-workstation)
 packages for continuous delivery to developer workstations. The packages here are RPMs, intended for installation
@@ -13,4 +13,4 @@ The repository requires use of [git-lfs](https://git-lfs.github.com/) to store l
 ## Publishing packages
 
 Merging into the `main` branch will automatically deploy packages to
-https://yum-test.securedrop.org/. Publishing happens every 15m.
+https://yum-test.securedrop.org/.
