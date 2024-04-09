@@ -1,7 +1,8 @@
 name: Remove old packages
 on:
-  schedule:
-    - cron: "0 8 * * *"
+  push:
+    branches:
+      - main
 defaults:
   run:
     shell: bash
