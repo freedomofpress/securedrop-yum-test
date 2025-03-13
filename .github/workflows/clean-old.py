@@ -10,8 +10,7 @@ container locally using podman or docker, e.g.:
 
     podman run -it --rm -v $(pwd):/workspace:Z fedora:39 bash
 
-The `rpm` module is provided by `python3-rpm`, and `rpmdev-vercmp`
-is provided by `rpmdevtools`.
+`rpmdev-vercmp` is provided by `rpmdevtools`.
 """
 import argparse
 import functools
@@ -19,8 +18,6 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 from typing import Tuple
-
-import rpm
 
 
 def sort_rpm_versions(one: Tuple[str, Path], two: Tuple[str, Path]):
@@ -34,36 +31,18 @@ def sort_rpm_versions(one: Tuple[str, Path], two: Tuple[str, Path]):
         return -1
 
 
-def fix_name(name: str) -> str:
-    """
-    Linux packages embed the version in the name, so we'd never have multiple
-    packages meet the deletion threshold. Silly string manipulation to drop
-    the version.
-    E.g. "linux-image-5.15.26-grsec-securedrop" -> "linux-image-securedrop"
-    """
-    if name.endswith(('-securedrop', '-workstation')):
-        suffix = name.split('-')[-1]
-    else:
-        return name
-    if name.startswith('linux-image-'):
-        return f'linux-image-{suffix}'
-    elif name.startswith('linux-headers-'):
-        return f'linux-headers-{suffix}'
-    return name
-
-
 def rpm_info(path: Path) -> Tuple[str, str]:
     """
-    learned this incantation from <https://web.archive.org/web/20120911204323/http://docs.fedoraproject.org/en-US/Fedora_Draft_Documentation/0.1/html/RPM_Guide/ch16s05.html>
-    and help(headers)
+    Get RPM package name and version using a single subprocess call to rpm command.
+    Returns a tuple of (name, version-release)
     """
-    ts = rpm.ts()
-    with path.open() as f:
-        headers = ts.hdrFromFdno(f)
-    print(headers[rpm.RPMTAG_VERSION])
+    # n.b. we shell out to `rpm` because we can ignore the missing PGP key,
+    # while using python3-rpm errors on it in a way that isn't recoverable.
+    cmd = ['rpm', '-qp', '--qf', '%{NAME}|%{VERSION}-%{RELEASE}', str(path)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    name, version_release = result.stdout.split('|')
 
-    return headers[rpm.RPMTAG_NAME], headers[rpm.RPMTAG_VERSION] + '-' + headers[rpm.RPMTAG_RELEASE]
-
+    return name, version_release
 
 def cleanup(data, to_keep: int, sorter):
     for name, versions in sorted(data.items()):
