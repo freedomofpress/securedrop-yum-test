@@ -1,0 +1,52 @@
+name: Sign packages
+on:
+  push:
+    branches:
+      # FIXME switch to main
+      - gha-r2
+    paths:
+      - 'workstation/**'
+      - '.github/workflows/sign.yml'
+      - '.github/workflows/autosign.py'
+defaults:
+  run:
+    shell: bash
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        # FIXME: switch to debian (rpm-sign isn't happy with it though)
+        container: fedora:41
+        steps:
+            - name: Install dependencies
+              run: |
+                dnf install -y rpmdevtools git git-lfs python3 rpm-sign createrepo_c
+            - uses: actions/checkout@v4
+              with:
+                lfs: true
+                token: ${{ secrets.PUSH_TOKEN }}
+            - name: Configuration
+              env:
+                SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+              run: |
+                echo "$SIGNING_KEY" | gpg --import -
+                git config --global --add safe.directory '*'
+                git config user.email "securedrop@freedom.press"
+                git config user.name "sdcibot"
+            - name: Sign packages
+              run: |
+                ./.github/workflows/autosign.py workstation --fingerprint 83127F68BABB04F3FE9A69AA545E94503FAB65AB
+                git add .
+            - name: Update metadata
+              run: |
+                # Only run if we signed packages above, otherwise this'll keep running over and over
+                # since the timestamp changes.
+                if [[ -n "$(git diff --staged)" ]]; then
+                  ./tools/publish-real
+                  git add .
+                fi
+            - name: git commit and push
+              run: |
+                # Index will be clean if there are no changes
+                git diff-index --quiet HEAD || git commit -m "Signing new packages"
+                git push origin gha-r2

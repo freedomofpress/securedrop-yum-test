@@ -1,0 +1,6 @@
+#!/bin/bash
+# Pull the latest image
+podman pull debian:bookworm
+# Mount the git repo to /srv, install necessary packages and run the publish script
+podman run --rm -it -v $(git rev-parse --show-toplevel):/srv:Z debian:bookworm \
+    bash -c "apt-get update && apt-get install -y python3 createrepo-c && /srv/tools/publish-real $@"
