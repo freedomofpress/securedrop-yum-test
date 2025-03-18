@@ -8,6 +8,8 @@ on:
       - 'workstation/**'
       - '.github/workflows/sign.yml'
       - '.github/workflows/autosign.py'
+      - '.github/workflows/listing.py'
+      - '.github/workflows/index.html.j2'
 defaults:
   run:
     shell: bash
@@ -20,7 +22,7 @@ jobs:
         steps:
             - name: Install dependencies
               run: |
-                dnf install -y rpmdevtools git git-lfs python3 rpm-sign createrepo_c
+                dnf install -y rpmdevtools git git-lfs python3 python3-jinja2 rpm-sign createrepo_c
             - uses: actions/checkout@v4
               with:
                 lfs: true
@@ -47,8 +49,9 @@ jobs:
                 # since the timestamp changes.
                 if [[ -n "$(git diff --staged)" ]]; then
                   ./.github/workflows/build.py
-                  git add .
                 fi
+                ./.github/workflows/listing.py
+                git add .
             - name: git commit and push
               run: |
                 # Index will be clean if there are no changes
