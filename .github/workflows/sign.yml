@@ -20,11 +20,6 @@ jobs:
         # TODO: switch to debian (rpm-sign isn't happy with it though)
         container: fedora:41
         steps:
-          - uses: actions/create-github-app-token@v2
-            id: app-token
-            with:
-              app-id: ${{ vars.FPF_BRANCH_UPDATER_APP_ID }}
-              private-key: ${{ secrets.FPF_BRANCH_UPDATER_APP_PRIVKEY }}
 
           - name: Install dependencies
             run: |
@@ -64,11 +59,16 @@ jobs:
               ./.github/workflows/listing.py
               git add .
 
+          - uses: actions/create-github-app-token@v2
+            id: app-token
+            with:
+              app-id: ${{ vars.FPF_BRANCH_UPDATER_APP_ID }}
+              private-key: ${{ secrets.FPF_BRANCH_UPDATER_APP_PRIVKEY }}
+
           - name: git commit and push
             env:
               GH_TOKEN: ${{ steps.app-token.outputs.token }}
             run: |
               # Index will be clean if there are no changes
               git diff-index --quiet HEAD || git commit -m "Signing new packages"
-              git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-              git push origin main
+              git push https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git main
