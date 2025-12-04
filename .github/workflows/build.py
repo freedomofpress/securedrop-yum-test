@@ -47,7 +47,7 @@ def main():
     shutil.copytree(workstation, public / "workstation")
     for rpm in public.glob("**/*.rpm"):
         os.utime(rpm, (timestamp, timestamp))
-    # Folders are public/workstation/dom0/fXX, run createrepo_c in each one
+    # Folders are public/workstation/dom0/*/, run createrepo_c in each one
     for folder in public.glob("*/*/*/"):
         if not folder.is_dir():
             continue
