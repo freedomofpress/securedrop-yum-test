@@ -30,7 +30,7 @@ def parse_rpm_repo(repo_path):
     # Let's check for common directory structures
     release_dirs = []
 
-    # Check for release-based directories (e.g., el8, el9, fedora36)
+    # Check for release-based directories (e.g., r4.2, r4.3, fedora41)
     for item in repo_base_path.iterdir():
         release_dirs.append((item.name, item))
 
