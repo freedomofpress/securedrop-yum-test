@@ -59,7 +59,7 @@ jobs:
               ./.github/workflows/listing.py
               git add .
 
-          - uses: actions/create-github-app-token@v2
+          - uses: actions/create-github-app-token@v3
             id: app-token
             with:
               app-id: ${{ vars.FPF_BRANCH_UPDATER_APP_ID }}
